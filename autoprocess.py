@@ -6,10 +6,11 @@ import requests
 import urllib.request
 from contextlib import closing
 import os
-
+import sys
+import subprocess
 
 #-----------------------------------------------------网页下载------------------------------------------------
-print('\n-----------------------------------------------选择文件----------------------------------------\n')
+print('\n----------------------------------选择文件-----------------------------------\n')
 url = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/?op=LISTSTATUS'
 res = urllib.request.urlopen(url)
 html1 = res.read().decode('utf-8')
@@ -21,7 +22,14 @@ for i in range(len(files)):
     print(str(i+1)+'.\t'+files[i])
 
 path=u'/Users/litian/PROGRAMMING/python/色情举报/数据/'
-myfiles=os.listdir(path)
+try:
+    myfiles=os.listdir(path)
+except:
+    print('路径不存在！创建新文件夹：')
+    os.system('mkdir 数据')
+    path='数据/'
+    myfiles=os.listdir(path)
+    
 if len(myfiles)==0:
     print('\n本地文件夹为空！')
 else:
@@ -31,13 +39,20 @@ else:
 choice=input('\n请选择要下载的文件：')
 day=files[int(choice)-1]
 
+if day in myfiles:
+    op=input('文件夹已存在！确定要覆盖吗(y/n)：')
+    if op!='y':
+        sys.exit()
+    else:
+        os.system('rm -r '+path+day)
+        
 
 os.mkdir(path+day)
 path=path+day
 print('\n创建文件夹：'+path)
 
 
-print('\n-----------------------------------------------下载文件---------------------------------------\n')
+print('\n----------------------------------下载文件----------------------------------\n')
 print('开始下载文件: '+files[int(choice)-1])
 url2 = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/'+files[int(choice)-1]+'?op=LISTSTATUS'
 res = urllib.request.urlopen(url2)
@@ -65,14 +80,14 @@ with closing(requests.get(url3, stream=True)) as response:
     content_size = int(response.headers['content-length']) # 内容体总大小
     with open(inname, "wb") as file:
         mycount=1
+        old=0
         for data in response.iter_content(chunk_size=chunk_size):
             file.write(data)
             #progress.refresh(count=len(data))
             mycount = mycount+len(data)
-            old=0
             if int(mycount/content_size*100)>old:
                 out='下载进度：'+str(int(mycount/content_size*100))+'%\t\t'+str(round(mycount/chunk_size,2))+' KB/ '+str(round(content_size/chunk_size,2))+' KB'
-                print('\r',out.ljust(40),end='',flush=True)
+                print('\r',out.ljust(40),end='')
                 old=int(mycount/content_size*100)
         print('下载成功！')
 
@@ -81,7 +96,7 @@ with closing(requests.get(url3, stream=True)) as response:
 
 #-----------------------------------------------处理excel-----------------------------
 
-print('\n-----------------------------------------------处理文件---------------------------------------\n')
+print('\n----------------------------------处理文件----------------------------------\n')
 #fname=input('输入文件：')
 #fname=str(sys.argv[1])#现在全自动处理，所以也不需要输入文件这个参数了
 f=open(inname,'r')
@@ -182,3 +197,7 @@ else:
                 i=i+1
                 lines=rf.readline()
 print('\n\n随机抽样+分隔+BOM  处理完成!\n')
+
+print('请检查...正在打开文件......')
+subprocess.call(["open", outname])
+time.sleep(10)
