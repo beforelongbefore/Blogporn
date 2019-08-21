@@ -18,8 +18,13 @@ html1 = res.read().decode('utf-8')
 files=re.findall(u'"pathSuffix":"(.*?)"',html1)
 #files
 print('已更新文件：')
-for i in range(len(files)):
-    print(str(i+1)+'.\t'+files[i])
+if len(files)>7:
+    print(str(1)+'.\t'+'...')
+    for i in range(6):
+        print(str(i+2)+'.\t'+files[len(files)-6+i])
+else:       
+    for i in range(len(files)):
+        print(str(i+1)+'.\t'+files[i])
 
 path=u'/Users/litian/PROGRAMMING/python/色情举报/数据/'
 try:
@@ -37,7 +42,11 @@ else:
 
 
 choice=input('\n请选择要下载的文件：')
-day=files[int(choice)-1]
+day='2000-01-01'
+if len(files)>7:
+    day=files[len(files)-8+int(choice)]
+else:
+    day=files[int(choice)-1]
 
 if day in myfiles:
     op=input('文件夹已存在！确定要覆盖吗(y/n)：')
@@ -53,8 +62,8 @@ print('\n创建文件夹：'+path)
 
 
 print('\n----------------------------------下载文件----------------------------------\n')
-print('开始下载文件: '+files[int(choice)-1])
-url2 = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/'+files[int(choice)-1]+'?op=LISTSTATUS'
+print('开始下载文件: '+day)
+url2 = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/'+day+'?op=LISTSTATUS'
 res = urllib.request.urlopen(url2)
 html2 = res.read().decode('utf-8')
 #print(html2)
@@ -66,7 +75,7 @@ print('获取源文件名称：'+originame+'\n')
 
 
 #print("downloading with requests")
-url3 = 'http://10.75.1.151:50075/webhdfs/v1/complaint/mblog/'+files[int(choice)-1]+'/'+originame+'?op=OPEN&namenoderpcaddress=0.0.0.0:9000&offset=0' 
+url3 = 'http://10.75.1.151:50075/webhdfs/v1/complaint/mblog/'+day+'/'+originame+'?op=OPEN&namenoderpcaddress=0.0.0.0:9000&offset=0' 
 
 
 #下载进度
@@ -101,7 +110,7 @@ print('\n----------------------------------处理文件-------------------------
 #fname=str(sys.argv[1])#现在全自动处理，所以也不需要输入文件这个参数了
 f=open(inname,'r')
 line1=f.readline()
-date=line1.split('\t')[2].replace('\n','')
+date=line1.split('\t')[2].replace('\n','')#显示数据的日期，作为最终的检查
 count=len(f.readlines())+1#前面readline()使其减少了一行
 f.close()
 print('文件\t'+inname+'\n共\t'+str(count)+'条数据!'+'\n数据日期\t'+str(date))
