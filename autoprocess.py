@@ -9,6 +9,7 @@ import os
 import sys
 import subprocess
 
+
 #-----------------------------------------------------网页下载------------------------------------------------
 print('\n----------------------------------选择文件-----------------------------------\n')
 url = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/?op=LISTSTATUS'
@@ -26,12 +27,18 @@ else:
     for i in range(len(files)):
         print(str(i+1)+'.\t'+files[i])
 
-path=u'/Users/litian/PROGRAMMING/python/色情举报/数据/'
+path=u'/Users/litian/PROGRAMMING/python/色情举报/-数据/'
 try:
     myfiles=os.listdir(path)
-except:
-    print('路径不存在！创建新文件夹：')
-    os.system('mkdir 数据')
+except:#发生错误，不存在该路径
+    #print('文件夹路径：/数据')
+    #os.system('mkdir 数据')
+    try:
+        os.mkdir('数据')
+        print('创建本地文件夹: /数据')
+    except:
+        print('本地文件夹路径: /数据')
+    
     path='数据/'
     myfiles=os.listdir(path)
     
@@ -44,20 +51,31 @@ else:
 choice=input('\n请选择要下载的文件：')
 day='2000-01-01'
 
-if len(files)>7 and choice!='1':
-    day=files[len(files)-8+int(choice)]
-    while 'cplt' in day:
-        choice=input('\n请选择正确格式的文件: ')
+if len(files)>7:
+    if choice!='1':
         day=files[len(files)-8+int(choice)]
-elif len(files)>7 and choice=='1':#展开
-    print('显示所有文件：')
-    for i in range(len(files)):
-        print(str(i+1)+'.\t'+files[i])
-    choice=input('\n请选择要下载的文件：')
-    day=files[int(choice)-1]
-    while 'cplt' in day:
-        choice=input('\n请选择正确格式的文件: ')
+        while 'cplt' in day:
+            choice=input('\n请选择正确格式的文件: ')
+            day=files[len(files)-8+int(choice)]
+        if choice=='1':
+            print('显示所有文件：')
+            for i in range(len(files)):
+                print(str(i+1)+'.\t'+files[i])
+            choice=input('\n请选择要下载的文件：')
+            day=files[int(choice)-1]
+            while 'cplt' in day:
+                choice=input('\n请选择正确格式的文件: ')
+                day=files[int(choice)-1]
+                   
+    elif choice=='1':#展开
+        print('显示所有文件：')
+        for i in range(len(files)):
+            print(str(i+1)+'.\t'+files[i])
+        choice=input('\n请选择要下载的文件：')
         day=files[int(choice)-1]
+        while 'cplt' in day:
+            choice=input('\n请选择正确格式的文件: ')
+            day=files[int(choice)-1]
 else:
     day=files[int(choice)-1]
     while 'cplt' in day:
