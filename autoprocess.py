@@ -38,21 +38,31 @@ except:
 if len(myfiles)==0:
     print('\n本地文件夹为空！')
 else:
-    print('\n已处理至：'+max(myfiles))
+    print('\n已处理至：'+max([f for f in myfiles if 'cplt' not in f]))
 
 
 choice=input('\n请选择要下载的文件：')
 day='2000-01-01'
+
 if len(files)>7 and choice!='1':
     day=files[len(files)-8+int(choice)]
-elif len(files)>7 and choice=='1':
+    while 'cplt' in day:
+        choice=input('\n请选择正确格式的文件: ')
+        day=files[len(files)-8+int(choice)]
+elif len(files)>7 and choice=='1':#展开
     print('显示所有文件：')
     for i in range(len(files)):
         print(str(i+1)+'.\t'+files[i])
     choice=input('\n请选择要下载的文件：')
     day=files[int(choice)-1]
+    while 'cplt' in day:
+        choice=input('\n请选择正确格式的文件: ')
+        day=files[int(choice)-1]
 else:
     day=files[int(choice)-1]
+    while 'cplt' in day:
+        choice=input('\n请选择正确格式的文件: ')
+        day=files[int(choice)-1]
 
 if day in myfiles:
     op=input('文件夹已存在！确定要覆盖吗(y/n)：')
