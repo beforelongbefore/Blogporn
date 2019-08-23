@@ -43,8 +43,14 @@ else:
 
 choice=input('\n请选择要下载的文件：')
 day='2000-01-01'
-if len(files)>7:
+if len(files)>7 and choice!='1':
     day=files[len(files)-8+int(choice)]
+elif len(files)>7 and choice=='1':
+    print('显示所有文件：')
+    for i in range(len(files)):
+        print(str(i+1)+'.\t'+files[i])
+    choice=input('\n请选择要下载的文件：')
+    day=files[int(choice)-1]
 else:
     day=files[int(choice)-1]
 
