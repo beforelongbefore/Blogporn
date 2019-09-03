@@ -11,13 +11,12 @@ import sys
 import subprocess
 import shutil
 
+path=u'/Users/litian/PROGRAMMING/python/色情举报/数据/'
+num=25000# 抽样数量
 
-
-#-----------------------------------------------------网页下载------------------------------------------------
 def fonline():
     url = r'http://10.75.1.151:50070/webhdfs/v1/complaint/mblog/?op=LISTSTATUS'
     print('\n----------------------------------选择文件-----------------------------------\n')
-
     res = urllib.request.urlopen(url)
     html = res.read().decode('utf-8')
     files=re.findall(u'"pathSuffix":"(.*?)"',html)
@@ -31,32 +30,17 @@ def fonline():
             print(str(i+1)+'.\t'+files[i])
     return files
 
-
-
-def flocal():
-    path=u'/Users/litian/PROGRAMMING/python/色情举报/数据/'
-    try:
-        myfiles=os.listdir(path)
-    except:
-        try:
-            os.mkdir('数据')
-            print('创建本地文件夹: /数据')
-        except:
-            print('本地文件夹路径: /数据')
-        path='数据/'
-        myfiles=os.listdir(path)
-
+def flocal(path):
+    myfiles=os.listdir(path)
     if len(myfiles)==0:
         print('\n本地文件夹为空！')
     else:
         print('\n已处理至：'+max([f for f in myfiles if 'cplt' not in f]))
-    return myfiles,path
+    return myfiles
 
-
-def choose(files, myfiles,path):
+def choose(files,myfiles,path):
     choice=input('\n请选择要下载的文件：')
     day='2000-01-01'
-
     if len(files)>7:
         if choice!='1':
             day=files[len(files)-8+int(choice)]
@@ -86,7 +70,6 @@ def choose(files, myfiles,path):
         while 'cplt' in day:
             choice=input('\n请选择正确格式的文件: ')
             day=files[int(choice)-1]
-
     if day in myfiles:
         op=input('文件夹已存在！确定要覆盖吗(y/n)：')
         if op!='y':
@@ -94,9 +77,6 @@ def choose(files, myfiles,path):
         else:
             shutil.rmtree(path+day)
     return day
-
-
-
 
 def geturl(day):
     print('开始下载文件: '+day)
@@ -126,9 +106,15 @@ def downloading(url,inname):
                     print('\r',out.ljust(40),end='')
                     old=int(mycount/content_size*100)
             print('下载成功！')
-
-
-
+            
+def checkfile(inname):         
+    f=open(inname,'r')
+    line1=f.readline()
+    date=line1.split('\t')[2].replace('\n','')#显示数据中的日期，检查
+    count=len(f.readlines())+1
+    f.close()
+    print('文件\t'+inname+'\n共\t'+str(count)+'条数据!'+'\n数据日期\t'+str(date))
+    return date,count
 
 def excel(inname,outname,count,num):
     if count>num and count<2*num:
@@ -142,7 +128,6 @@ def excel(inname,outname,count,num):
                 w=csv.writer(f)
                 i=0
                 start=time.clock()
-              
                 while lines:
                     if i%1000==0:
                         end=time.clock()
@@ -150,22 +135,16 @@ def excel(inname,outname,count,num):
                         left=(count-i)*t1/(i+1)
                         out='处理至\t'+str(i)+',\t已用时\t'+str(round(t1,2))+'s'+',\t预计剩余\t'+str(round(left,2))+'s'
                         print('\r',out.ljust(40),end='',flush=True)
-
                     if i not in rmlist:
                         line=lines.split('\t')  #
                         w.writerow(line)
                     i=i+1
                     lines=rf.readline()
-
-
     elif count>=2*num:
-
         list=[i for i in range(count)]
         savelist=random.sample(list,num)
-
         with open(inname,'r') as rf:
             lines=rf.readline()
-
             with open(outname,'w') as f:
                 f.write(u'\ufeff')
                 w=csv.writer(f)
@@ -184,7 +163,6 @@ def excel(inname,outname,count,num):
                         w.writerow(line)  
                     i=i+1  
                     lines=rf.readline()
-
     else:
          with open(inname,'r') as rf:
             lines=rf.readline()
@@ -208,38 +186,30 @@ def excel(inname,outname,count,num):
                     lines=rf.readline()
     print('\n\n随机抽样+分隔+BOM  处理完成!\n')
 
-    
-
 if __name__ == '__main__':
+    
+    try:
+        test=os.listdir(path)
+    except:
+        os.mkdir(path)
+        print('\n创建本地文件夹:'+path)
     files=fonline()
-    myfiles,path0=flocal()
-    day=choose(files,myfiles,path0)
-    path=path0+day
-    os.mkdir(path)
-    print('\n创建文件夹：'+path)
-
+    myfiles=flocal(path)
+    day=choose(files,myfiles,path)
+    path1=path+day
+    os.mkdir(path1)
+    print('\n创建文件夹：'+path1)
     print('\n----------------------------------下载文件----------------------------------\n')
     url,originame=geturl(day)
-
-
-    inname=path+'/'+originame
+    inname=path1+'/'+originame
     downloading(url,inname)#将url的文件下载至本地inname文件
-
-
     print('\n----------------------------------处理文件----------------------------------\n')
-    f=open(inname,'r')
-    line1=f.readline()
-    date=line1.split('\t')[2].replace('\n','')#显示数据中的日期，作为检查
-    count=len(f.readlines())+1#前面readline()使其减少了一行
-    f.close()
-    print('文件\t'+inname+'\n共\t'+str(count)+'条数据!'+'\n数据日期\t'+str(date))
-    outname=path+'/Blogporn'+date.replace('-','')+u'.csv'
+    date,count=checkfile(inname)
+    outname=path1+'/Blogporn'+date.replace('-','')+u'.csv'
     print('\n输出路径：'+outname+'\n')
 
-
-    num=25000
+    
     excel(inname,outname,count,num) #原数据，输出文件，原数据总量，抽样数量
-
 
     print('请检查...正在打开文件......')
     subprocess.call(["open", outname])
